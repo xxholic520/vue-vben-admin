@@ -5,6 +5,7 @@ import { getParentLayout, LAYOUT, EXCEPTION_COMPONENT } from '@/router/constant'
 import { cloneDeep, omit } from 'lodash-es';
 import { warn } from '@/utils/log';
 import { createRouter, createWebHashHistory } from 'vue-router';
+import { RouterVO } from '@/api/system/menu/types';
 
 export type LayoutMapKey = 'LAYOUT';
 const IFRAME = () => import('@/views/sys/iframe/FrameBlank.vue');
@@ -180,4 +181,38 @@ function isMultipleRoute(routeModule: AppRouteModule) {
     }
   }
   return flag;
+}
+
+/**
+ * 转换ry-plus路由
+ * @param routeList
+ * @returns
+ */
+export function transformRyPlusToRoutes<T = AppRouteModule>(routeList: RouterVO[]): T[] {
+  const appRoutesList: AppRouteModule[] = [];
+  routeList.forEach((route) => {
+    const { name, path, children } = route;
+    const { title, icon, noCache: ignoreKeepAlive, link, ...otherMeta } = route.meta;
+    const appRoute: AppRouteModule = {
+      name,
+      path,
+      meta: {
+        title,
+        icon,
+        ignoreKeepAlive,
+        hideMenu: route.hidden,
+        ...otherMeta,
+      },
+      component: route.component,
+    };
+    if (link && (link.startsWith('http') || link.startsWith('https'))) {
+      appRoute.path = `/${appRoute.path}`;
+    }
+    if (appRoute.component === 'ParentView') {
+      delete appRoute.component;
+    }
+    children && (appRoute.children = transformRyPlusToRoutes(children));
+    appRoutesList.push(appRoute);
+  });
+  return appRoutesList as T[];
 }

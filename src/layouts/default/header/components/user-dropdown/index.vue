@@ -74,7 +74,7 @@
   const userStore = useUserStore();
 
   const getUserInfo = computed(() => {
-    const { realName = '', avatar, desc } = userStore.getUserInfo || {};
+    const { nickName: realName = '', avatar, remark: desc } = userStore.getUserInfo.user || {};
     return { realName, avatar: avatar || headerImg, desc };
   });
 

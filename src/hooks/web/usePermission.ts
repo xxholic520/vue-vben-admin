@@ -74,6 +74,9 @@ export function usePermission() {
 
     if (PermissionModeEnum.BACK === permMode) {
       const allCodeList = permissionStore.getPermCodeList as string[];
+      if (allCodeList.includes('*:*:*')) {
+        return true;
+      }
       if (!isArray(value)) {
         const splits = ['||', '&&'];
         const splitName = splits.find((item) => value.includes(item));

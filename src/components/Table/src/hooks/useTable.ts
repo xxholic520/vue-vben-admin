@@ -8,6 +8,7 @@ import { ref, onUnmounted, unref, watch, toRaw } from 'vue';
 import { isProdMode } from '@/utils/env';
 import { error } from '@/utils/log';
 import type { Key } from 'ant-design-vue/lib/table/interface';
+import { useMessage } from '@/hooks/web/useMessage';
 
 type Props = Partial<DynamicProps<BasicTableProps>>;
 
@@ -15,10 +16,13 @@ type UseTableMethod = TableActionType & {
   getForm: () => FormActionType;
 };
 
+const { createConfirm } = useMessage();
+
 export function useTable(tableProps?: Props): [
   (instance: TableActionType, formInstance: UseTableMethod) => void,
   TableActionType & {
     getForm: () => FormActionType;
+    multipleRemove: (api: (...args: any) => Promise<any>) => void;
   },
 ] {
   const tableRef = ref<Nullable<TableActionType>>(null);
@@ -67,6 +71,7 @@ export function useTable(tableProps?: Props): [
 
   const methods: TableActionType & {
     getForm: () => FormActionType;
+    multipleRemove: (api: (...args: any) => Promise<any>) => void;
   } = {
     reload: async (opt?: FetchParams) => {
       return await getTableInstance().reload(opt);
@@ -167,6 +172,20 @@ export function useTable(tableProps?: Props): [
     },
     scrollTo: (pos: string) => {
       getTableInstance().scrollTo(pos);
+    },
+    multipleRemove: (api: (...args: any) => Promise<any>) => {
+      const instance = getTableInstance();
+      const selectedRowKeys = instance.getSelectRowKeys();
+      createConfirm({
+        title: '系统提示',
+        content: `是否删除ID为"${selectedRowKeys.join(',')}"的数据项？`,
+        iconType: 'warning',
+        onOk: async () => {
+          await api(selectedRowKeys);
+          instance.clearSelectedRowKeys();
+          await instance.reload();
+        },
+      });
     },
   };
 

@@ -50,3 +50,23 @@ export enum RouterTransitionEnum {
   FADE_BOTTOM = 'fade-bottom',
   FADE_SCALE = 'fade-scale',
 }
+
+export enum IconEnum {
+  EDIT = 'uil:edit',
+  SYNC = 'ic:baseline-sync',
+  DELETE = 'uil:trash',
+  IMPORT = 'bx:import',
+  EXPORT = 'bx:export',
+  RESET_PWD = 'fluent:key-reset-20-filled',
+  ADD = 'uil:plus-circle',
+  EXPAND = 'ion:expand-outline',
+  COLLAPSE = 'octicon:sidebar-collapse-16',
+  REFRESH = 'charm:refresh',
+  DETAIL = 'icon-park-outline:view-grid-detail',
+  UNLOCK = 'icon-park-twotone:unlock',
+  UPLOAD = 'material-symbols:upload',
+  DOWNLOAD = 'material-symbols:download',
+  PREVIEW = 'codicon:preview',
+  PREV = 'iconoir:skip-prev',
+  NEXT = 'iconoir:skip-next',
+}

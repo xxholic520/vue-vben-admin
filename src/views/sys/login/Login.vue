@@ -88,7 +88,8 @@
       }
 
       .ant-input,
-      .ant-input-password {
+      .ant-input-password,
+      .ant-select-selector {
         background-color: #232a3b;
       }
 

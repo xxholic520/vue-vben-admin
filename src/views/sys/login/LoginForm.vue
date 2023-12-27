@@ -8,12 +8,19 @@
     v-show="getShow"
     @keypress.enter="handleLogin"
   >
-    <FormItem name="account" class="enter-x">
+    <FormItem name="tenantId" class="enter-x" v-if="tenantEnabled">
+      <ASelect v-model:value="formData.tenantId" size="large" class="select-border">
+        <ASelectOption v-for="item in tenantList" :key="item.tenantId" :value="item.tenantId">
+          {{ item.companyName }}
+        </ASelectOption>
+      </ASelect>
+    </FormItem>
+    <FormItem name="username" class="enter-x">
       <Input
         size="large"
-        v-model:value="formData.account"
+        v-model:value="formData.username"
         :placeholder="t('sys.login.userName')"
-        class="fix-auto-fill"
+        autocomplete="off"
       />
     </FormItem>
     <FormItem name="password" class="enter-x">
@@ -23,6 +30,25 @@
         v-model:value="formData.password"
         :placeholder="t('sys.login.password')"
       />
+    </FormItem>
+    <FormItem name="code" class="enter-x" v-if="captchaEnabled">
+      <Input
+        ref="imageCodeRef"
+        size="large"
+        v-model:value="formData.code"
+        placeholder="输入验证码"
+        autocomplete="off"
+      >
+        <template #addonAfter>
+          <Image
+            :preview="false"
+            :height="38"
+            :width="120"
+            :src="imageInfo"
+            @click="getImageCode"
+          />
+        </template>
+      </Input>
     </FormItem>
 
     <ARow class="enter-x">
@@ -52,7 +78,7 @@
         {{ t('sys.login.registerButton') }}
       </Button> -->
     </FormItem>
-    <ARow class="enter-x" :gutter="[16, 16]">
+    <!-- <ARow class="enter-x" :gutter="[16, 16]">
       <ACol :md="8" :xs="24">
         <Button block @click="setLoginState(LoginStateEnum.MOBILE)">
           {{ t('sys.login.mobileSignInFormTitle') }}
@@ -68,38 +94,57 @@
           {{ t('sys.login.registerButton') }}
         </Button>
       </ACol>
-    </ARow>
+    </ARow> -->
 
-    <Divider class="enter-x">{{ t('sys.login.otherSignIn') }}</Divider>
+    <!-- <Divider class="enter-x">{{ t('sys.login.otherSignIn') }}</Divider> -->
 
-    <div class="flex justify-evenly enter-x" :class="`${prefixCls}-sign-in-way`">
+    <!-- <div class="flex justify-evenly enter-x" :class="`${prefixCls}-sign-in-way`">
       <GithubFilled />
       <WechatFilled />
       <AlipayCircleFilled />
       <GoogleCircleFilled />
       <TwitterCircleFilled />
-    </div>
+    </div> -->
   </Form>
 </template>
 <script lang="ts" setup>
-  import { reactive, ref, unref, computed } from 'vue';
+  import { reactive, ref, unref, computed, toRaw } from 'vue';
 
-  import { Checkbox, Form, Input, Row, Col, Button, Divider } from 'ant-design-vue';
   import {
-    GithubFilled,
-    WechatFilled,
-    AlipayCircleFilled,
-    GoogleCircleFilled,
-    TwitterCircleFilled,
-  } from '@ant-design/icons-vue';
+    Checkbox,
+    Form,
+    Input,
+    Row,
+    Col,
+    Button,
+    // Divider,
+    Select as ASelect,
+    SelectOption as ASelectOption,
+    Image,
+  } from 'ant-design-vue';
+  // import {
+  //   GithubFilled,
+  //   WechatFilled,
+  //   AlipayCircleFilled,
+  //   GoogleCircleFilled,
+  //   TwitterCircleFilled,
+  // } from '@ant-design/icons-vue';
   import LoginFormTitle from './LoginFormTitle.vue';
 
   import { useI18n } from '@/hooks/web/useI18n';
   import { useMessage } from '@/hooks/web/useMessage';
 
   import { useUserStore } from '@/store/modules/user';
-  import { LoginStateEnum, useLoginState, useFormRules, useFormValid } from './useLogin';
+  import {
+    LoginStateEnum,
+    useLoginState,
+    useFormRules,
+    useFormValid,
+    useTenantState,
+    useCaptchaImageState,
+  } from './useLogin';
   import { useDesign } from '@/hooks/web/useDesign';
+  import { createLocalStorage } from '@/utils/cache';
   //import { onKeyStroke } from '@vueuse/core';
 
   const ACol = Col;
@@ -107,20 +152,24 @@
   const FormItem = Form.Item;
   const InputPassword = Input.Password;
   const { t } = useI18n();
-  const { notification, createErrorModal } = useMessage();
+  const { createErrorModal } = useMessage();
   const { prefixCls } = useDesign('login');
   const userStore = useUserStore();
 
   const { setLoginState, getLoginState } = useLoginState();
   const { getFormRules } = useFormRules();
+  const ls = createLocalStorage();
 
   const formRef = ref();
   const loading = ref(false);
-  const rememberMe = ref(false);
+  const rememberMe = ref(ls.get('rememberMe', false));
 
   const formData = reactive({
-    account: 'vben',
-    password: '123456',
+    tenantId: ls.get('tenantId', '000000'),
+    username: ls.get('username', ''),
+    password: ls.get('password', ''),
+    code: '',
+    uuid: '',
   });
 
   const { validForm } = useFormValid(formRef);
@@ -129,31 +178,46 @@
 
   const getShow = computed(() => unref(getLoginState) === LoginStateEnum.LOGIN);
 
+  const { tenantEnabled, tenantList } = useTenantState();
+
+  const { captchaEnabled, imageInfo, getImageCode } = useCaptchaImageState(formData);
+
   async function handleLogin() {
-    const data = await validForm();
-    if (!data) return;
-    try {
-      loading.value = true;
-      const userInfo = await userStore.login({
-        password: data.password,
-        username: data.account,
-        mode: 'none', //不要默认的错误提示
-      });
-      if (userInfo) {
-        notification.success({
-          message: t('sys.login.loginSuccessTitle'),
-          description: `${t('sys.login.loginSuccessDesc')}: ${userInfo.realName}`,
-          duration: 3,
+    async function afterLogin() {
+      try {
+        loading.value = true;
+        if (unref(rememberMe)) {
+          ls.set('tenantId', unref(formData).tenantId, null);
+          ls.set('username', unref(formData).username, null);
+          ls.set('password', unref(formData).password, null);
+          ls.set('rememberMe', unref(rememberMe));
+        } else {
+          ls.remove('tenantId');
+          ls.remove('username');
+          ls.remove('password');
+          ls.remove('rememberMe');
+        }
+        await userStore.login({ ...toRaw(formData), mode: 'none' });
+        // notification.success({
+        //   message: t('sys.login.loginSuccessTitle'),
+        //   description: `${t('sys.login.loginSuccessDesc')}`,
+        //   duration: 3,
+        // });
+        return Promise.resolve();
+      } catch (error) {
+        createErrorModal({
+          title: t('sys.api.errorTip'),
+          content: (error as unknown as Error).message || t('sys.api.networkExceptionMsg'),
+          getContainer: () => document.body.querySelector(`.${prefixCls}`) || document.body,
         });
+        if (unref(captchaEnabled)) {
+          getImageCode();
+        }
+        return Promise.reject(error);
+      } finally {
+        loading.value = false;
       }
-    } catch (error) {
-      createErrorModal({
-        title: t('sys.api.errorTip'),
-        content: (error as unknown as Error).message || t('sys.api.networkExceptionMsg'),
-        getContainer: () => document.body.querySelector(`.${prefixCls}`) || document.body,
-      });
-    } finally {
-      loading.value = false;
     }
+    validForm().then(afterLogin);
   }
 </script>

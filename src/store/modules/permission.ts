@@ -18,11 +18,15 @@ import { ERROR_LOG_ROUTE, PAGE_NOT_FOUND_ROUTE } from '@/router/routes/basic';
 
 import { filter } from '@/utils/helper/treeHelper';
 
-import { getMenuList } from '@/api/sys/menu';
-import { getPermCode } from '@/api/sys/user';
+// import { getMenuList } from '@/api/sys/menu';
+// import { getPermCode } from '@/api/sys/user';
 
 import { useMessage } from '@/hooks/web/useMessage';
 import { PageEnum } from '@/enums/pageEnum';
+import { getRouters } from '@/api/system/menu';
+import { transformRyPlusToRoutes } from '../../router/helper/routeHelper';
+
+import dashboard from '@/router/routes/modules/dashboard';
 
 interface PermissionState {
   // Permission code list
@@ -104,8 +108,8 @@ export const usePermissionStore = defineStore({
       this.lastBuildMenuTime = 0;
     },
     async changePermissionCode() {
-      const codeList = await getPermCode();
-      this.setPermCodeList(codeList);
+      // const codeList = await getPermCode();
+      // this.setPermCodeList(codeList);
     },
 
     // 构建路由
@@ -141,7 +145,8 @@ export const usePermissionStore = defineStore({
        * */
       const patchHomeAffix = (routes: AppRouteRecordRaw[]) => {
         if (!routes || routes.length === 0) return;
-        let homePath: string = userStore.getUserInfo.homePath || PageEnum.BASE_HOME;
+        // let homePath: string = userStore.getUserInfo.homePath || PageEnum.BASE_HOME;
+        let homePath = PageEnum.BASE_HOME as string;
 
         function patcher(routes: AppRouteRecordRaw[], parentPath = '') {
           if (parentPath) parentPath = parentPath + '/';
@@ -215,34 +220,49 @@ export const usePermissionStore = defineStore({
             duration: 1,
           });
 
-          // !Simulate to obtain permission codes from the background,
-          // 模拟从后台获取权限码，
-          // this function may only need to be executed once, and the actual project can be put at the right time by itself
-          // 这个功能可能只需要执行一次，实际项目可以自己放在合适的时间
           let routeList: AppRouteRecordRaw[] = [];
           try {
-            await this.changePermissionCode();
-            routeList = (await getMenuList()) as AppRouteRecordRaw[];
+            routeList = await getRouters();
           } catch (error) {
             console.error(error);
           }
 
+          routeList = transformRyPlusToRoutes(routeList);
+          routeList = transformObjToRoute(routeList);
+          const backMenuList = transformRouteToMenu([dashboard, ...routeList]);
+          this.setBackMenuList(backMenuList);
+          routeList = filter(routeList, routeRemoveIgnoreFilter);
+          routeList = routeList.filter(routeRemoveIgnoreFilter);
+          routeList = flatMultiLevelRoutes(routeList);
+          routes = [PAGE_NOT_FOUND_ROUTE, ...routeList];
+          // !Simulate to obtain permission codes from the background,
+          // 模拟从后台获取权限码，
+          // this function may only need to be executed once, and the actual project can be put at the right time by itself
+          // 这个功能可能只需要执行一次，实际项目可以自己放在合适的时间
+          // let routeList: AppRouteRecordRaw[] = [];
+          // try {
+          //   await this.changePermissionCode();
+          //   routeList = (await getMenuList()) as AppRouteRecordRaw[];
+          // } catch (error) {
+          //   console.error(error);
+          // }
+
           // Dynamically introduce components
           // 动态引入组件
-          routeList = transformObjToRoute(routeList);
+          // routeList = transformObjToRoute(routeList);
 
           //  Background routing to menu structure
           //  后台路由到菜单结构
-          const backMenuList = transformRouteToMenu(routeList);
-          this.setBackMenuList(backMenuList);
+          // const backMenuList = transformRouteToMenu(routeList);
+          // this.setBackMenuList(backMenuList);
 
           // remove meta.ignoreRoute item
           // 删除 meta.ignoreRoute 项
-          routeList = filter(routeList, routeRemoveIgnoreFilter);
-          routeList = routeList.filter(routeRemoveIgnoreFilter);
+          // routeList = filter(routeList, routeRemoveIgnoreFilter);
+          // routeList = routeList.filter(routeRemoveIgnoreFilter);
 
-          routeList = flatMultiLevelRoutes(routeList);
-          routes = [PAGE_NOT_FOUND_ROUTE, ...routeList];
+          // routeList = flatMultiLevelRoutes(routeList);
+          // routes = [PAGE_NOT_FOUND_ROUTE, ...routeList];
           break;
       }
 

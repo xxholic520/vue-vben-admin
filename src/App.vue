@@ -15,6 +15,7 @@
   import { useDarkModeTheme } from '@/hooks/setting/useDarkModeTheme';
   import 'dayjs/locale/zh-cn';
   import { computed } from 'vue';
+  import { useXWebsocket } from './utils/websocket';
 
   // support Multi-language
   const { getAntdLocale } = useLocale();
@@ -37,4 +38,6 @@
   );
   // Listening to page changes and dynamically changing site titles
   useTitle();
+
+  useXWebsocket();
 </script>

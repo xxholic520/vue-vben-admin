@@ -1,0 +1,59 @@
+import { defHttp } from '@/utils/http/axios';
+import { ${BusinessName}VO, ${BusinessName}Form, ${BusinessName}Query, ${BusinessName}ListGetResultModel } from '@/api/${moduleName}/${businessName}/types';
+
+/**
+ * 查询${functionName}列表
+ * @param query
+ * @returns {*}
+ */
+export function get${BusinessName}List(query?: ${BusinessName}Query) {
+  return defHttp.get<${BusinessName}ListGetResultModel>({ url: '/${moduleName}/${businessName}/list', params: query });
+}
+
+/**
+ * 查询${functionName}详细
+ * @param ${pkColumn.javaField}
+ */
+export function get${BusinessName}ById(${pkColumn.javaField}: string | number) {
+  return defHttp.get<${BusinessName}VO>({ url: '/${moduleName}/${businessName}/' + ${pkColumn.javaField}, method: 'get' });
+}
+
+/**
+ * 新增${functionName}
+ * @param data
+ */
+export function create${BusinessName}(data: ${BusinessName}Form) {
+  return defHttp.post({ url: '/${moduleName}/${businessName}', data }, { successMessageMode: 'message' });
+}
+
+/**
+ * 修改${functionName}
+ * @param data
+ */
+export function update${BusinessName}(data: ${BusinessName}Form) {
+  return defHttp.put({ url: '/${moduleName}/${businessName}', data }, { successMessageMode: 'message' });
+}
+
+/**
+ * 删除${functionName}
+ * @param ${pkColumn.javaField}
+ */
+export function remove${BusinessName}(${pkColumn.javaField}: string | number | Array<string | number>) {
+  return defHttp.delete({ url: '/${moduleName}/${businessName}/' + ${pkColumn.javaField} }, { successMessageMode: 'message' });
+}
+
+/**
+ * 导出${functionName}
+ * @param query
+ */
+export function export${BusinessName}(query?: ${BusinessName}Query) {
+  return defHttp.post<Blob>(
+    {
+      url: '/${moduleName}/${businessName}/export',
+      params: query,
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      responseType: 'blob',
+    },
+    { isTransformResponse: false },
+  );
+}

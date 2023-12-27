@@ -397,7 +397,7 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
 .CodeMirror pre {
   position: relative;
   z-index: 2;
-  padding: 0 4px; /* Horizontal padding of content */
+  padding: 0 8px; /* Horizontal padding of content */
   margin: 0;
   overflow: visible;
   font-family: inherit;

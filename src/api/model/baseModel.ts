@@ -4,6 +4,20 @@ export interface BasicPageParams {
 }
 
 export interface BasicFetchResult<T> {
-  items: T[];
+  // items: T[];
+  rows: T[];
   total: number;
+}
+
+export interface BasicEnity {
+  createBy?: any;
+  createDept?: any;
+  createTime?: string;
+  updateBy?: any;
+  updateTime?: any;
+}
+
+export interface PageQuery {
+  pageNum: number;
+  pageSize: number;
 }

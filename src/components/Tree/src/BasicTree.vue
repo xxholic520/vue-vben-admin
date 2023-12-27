@@ -347,6 +347,9 @@
         getSearchValue: () => {
           return searchState.searchText;
         },
+        getCheckStrictly: () => {
+          return state.checkStrictly;
+        },
       };
 
       function renderAction(node: TreeItem) {
