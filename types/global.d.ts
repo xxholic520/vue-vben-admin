@@ -69,6 +69,8 @@ declare global {
     VITE_GLOB_APP_TITLE: string;
     VITE_BUILD_COMPRESS: 'gzip' | 'brotli' | 'none';
     VITE_APP_WEBSOCKET: boolean;
+    VITE_GLOB_ADMIN_MONITOR_URL: string;
+    VITE_GLOB_POWERJOB_URL: string;
   }
 
   declare function parseInt(s: string | number, radix?: number): number;

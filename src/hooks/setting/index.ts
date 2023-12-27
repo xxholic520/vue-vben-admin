@@ -9,6 +9,8 @@ export const useGlobSetting = (): Readonly<GlobConfig> => {
     VITE_GLOB_API_URL_PREFIX,
     VITE_GLOB_UPLOAD_URL,
     VITE_GLOB_APP_CLIENT_ID,
+    VITE_GLOB_ADMIN_MONITOR_URL,
+    VITE_GLOB_POWERJOB_URL,
   } = getAppEnvConfig();
 
   // Take global configuration
@@ -19,6 +21,8 @@ export const useGlobSetting = (): Readonly<GlobConfig> => {
     urlPrefix: VITE_GLOB_API_URL_PREFIX,
     uploadUrl: VITE_GLOB_UPLOAD_URL,
     clientId: VITE_GLOB_APP_CLIENT_ID,
+    adminMonitorUrl: VITE_GLOB_ADMIN_MONITOR_URL,
+    powerjobUrl: VITE_GLOB_POWERJOB_URL,
   };
   return glob as Readonly<GlobConfig>;
 };

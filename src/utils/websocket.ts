@@ -45,9 +45,9 @@ export const useXWebsocket = () => {
       },
       immediate: false,
       onMessage(ws, e) {
-        if (e.data.indexOf('cmd') > 0) {
-          const { cmd } = JSON.parse(e.data);
-          _dep.notify(cmd, e.data);
+        if (e.data.indexOf('topic') > 0) {
+          const { topic } = JSON.parse(e.data);
+          _dep.notify(topic, e.data);
         } else {
           notification.success({
             message: '消息',
@@ -75,10 +75,9 @@ export const useXWebsocket = () => {
 export const useXWebsocketFn = () => {
   const getIsOpen = computed(() => unref(websocket?.status) === 'OPEN');
 
-  const sendMessageWithCallback = (data: any, callback: Fn) => {
-    const { cmd } = data;
-    _dep.depend(cmd, callback);
-    websocket?.send?.(JSON.stringify(data));
+  const sendMessageWithCallback = (topic: string, data: any, callback: Fn) => {
+    _dep.depend(topic, callback);
+    websocket?.send?.(JSON.stringify({ topic, data }));
   };
 
   return {

@@ -4,6 +4,7 @@ import { DictDataOption } from '@/utils/helper/dictHelper';
 import { VNode, h } from 'vue';
 import { Image as AImage, Switch, Tag } from 'ant-design-vue';
 import { promiseTimeout } from '@vueuse/shared';
+import Icon from '@/components/Icon/Icon.vue';
 // import { useMessage } from '../web/useMessage';
 
 // const { createConfirm } = useMessage();
@@ -75,6 +76,24 @@ function renderSwitch(record: Recordable, api: (...data: any) => Promise<any>) {
   });
 }
 
+function renderIcon(icon: string) {
+  return h(Icon, { icon });
+}
+
+function renderIconSpan(icon: string, value: string, marginLeft = '2px') {
+  return h(
+    'span',
+    {
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      },
+    },
+    [renderIcon(icon), ' ', h('span', { style: { marginLeft } }, value)],
+  );
+}
+
 export function useRender() {
   return {
     renderDictTag,
@@ -84,5 +103,6 @@ export function useRender() {
     renderSwitch,
     renderTag,
     renderTags,
+    renderIconSpan,
   };
 }

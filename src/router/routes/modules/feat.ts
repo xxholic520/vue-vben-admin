@@ -23,27 +23,27 @@ const feat: AppRouteModule[] = [
       },
     ],
   },
-  {
-    path: '/demo2/dict-data/:id',
-    name: 'Demo2DictData',
-    component: LAYOUT,
-    meta: {
-      title: '代码数据',
-    },
-    children: [
-      {
-        path: 'index',
-        name: 'Demo2DictDataIndex',
-        component: () => import('@/views/demo2/dict/data/index.vue'),
-        meta: {
-          title: '代码数据',
-          hideMenu: true,
-          hideTab: true,
-          currentActiveMenu: '/demo2/dict2',
-        },
-      },
-    ],
-  },
+  // {
+  //   path: '/demo2/dict-data/:id',
+  //   name: 'Demo2DictData',
+  //   component: LAYOUT,
+  //   meta: {
+  //     title: '代码数据',
+  //   },
+  //   children: [
+  //     {
+  //       path: 'index',
+  //       name: 'Demo2DictDataIndex',
+  //       component: () => import('@/views/demo2/dict/data/index.vue'),
+  //       meta: {
+  //         title: '代码数据',
+  //         hideMenu: true,
+  //         hideTab: true,
+  //         currentActiveMenu: '/demo2/dict2',
+  //       },
+  //     },
+  //   ],
+  // },
   {
     path: '/gen/edit/:tableId',
     name: 'GenEdit',

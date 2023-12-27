@@ -4,10 +4,10 @@ export const prefixCls = 'vben';
 
 export const multipleTabHeight = 30;
 
-export const darkMode = ThemeEnum.LIGHT;
+export const darkMode = ThemeEnum.DARK;
 
 // 页脚固定高度
-export const footerHeight = 90;
+export const footerHeight = 75;
 
 // .@{namespace}-layout-multiple-header__placeholder
 // 全屏页头动画时长

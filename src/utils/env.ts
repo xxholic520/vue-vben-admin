@@ -35,6 +35,8 @@ export function getAppEnvConfig() {
     VITE_GLOB_API_URL_PREFIX,
     VITE_GLOB_UPLOAD_URL,
     VITE_GLOB_APP_CLIENT_ID,
+    VITE_GLOB_ADMIN_MONITOR_URL,
+    VITE_GLOB_POWERJOB_URL,
   } = ENV;
   let { VITE_GLOB_API_URL } = ENV;
   if (localStorage.getItem(API_ADDRESS)) {
@@ -47,6 +49,8 @@ export function getAppEnvConfig() {
     VITE_GLOB_API_URL_PREFIX,
     VITE_GLOB_UPLOAD_URL,
     VITE_GLOB_APP_CLIENT_ID,
+    VITE_GLOB_ADMIN_MONITOR_URL,
+    VITE_GLOB_POWERJOB_URL,
   };
 }
 

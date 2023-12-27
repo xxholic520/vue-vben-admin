@@ -4,7 +4,8 @@
       name="file"
       multiple
       @change="handleChange"
-      :action="uploadUrl"
+      :action="actionUrl"
+      :headers="headers"
       :showUploadList="false"
       accept=".jpg,.jpeg,.gif,.png,.webp"
     >
@@ -21,6 +22,7 @@
   import { useDesign } from '@/hooks/web/useDesign';
   import { useGlobSetting } from '@/hooks/setting';
   import { useI18n } from '@/hooks/web/useI18n';
+  import { getToken } from '@/utils/auth';
 
   defineOptions({ name: 'TinymceImageUpload' });
 
@@ -38,9 +40,15 @@
 
   let uploading = false;
 
-  const { uploadUrl } = useGlobSetting();
+  const { uploadUrl, apiUrl, clientId, urlPrefix } = useGlobSetting();
   const { t } = useI18n();
   const { prefixCls } = useDesign('tinymce-img-upload');
+
+  const actionUrl = `${apiUrl}${urlPrefix || ''}${uploadUrl}`;
+  const headers = {
+    Authorization: `Bearer ${getToken()}`,
+    clientId,
+  };
 
   const getButtonProps = computed(() => {
     const { disabled } = props;

@@ -149,8 +149,12 @@ export interface GlobConfig {
   urlPrefix?: string;
   // Project abbreviation
   shortName: string;
-
+  // 客户端key
   clientId: string;
+  // springadmin地址
+  adminMonitorUrl: string;
+  // powerjob地址
+  powerjobUrl: string;
 }
 export interface GlobEnvConfig {
   // Site title
@@ -163,4 +167,6 @@ export interface GlobEnvConfig {
   VITE_GLOB_UPLOAD_URL?: string;
 
   VITE_GLOB_APP_CLIENT_ID: string;
+  VITE_GLOB_ADMIN_MONITOR_URL: string;
+  VITE_GLOB_POWERJOB_URL: string;
 }

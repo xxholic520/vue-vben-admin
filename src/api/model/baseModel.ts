@@ -18,6 +18,8 @@ export interface BasicEnity {
 }
 
 export interface PageQuery {
-  pageNum: number;
-  pageSize: number;
+  pageNum?: number;
+  pageSize?: number;
+  orderByColumn?: string;
+  isAsc?: boolean;
 }
