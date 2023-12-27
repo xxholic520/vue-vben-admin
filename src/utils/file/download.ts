@@ -1,5 +1,12 @@
+import { useLoading } from '@/components/Loading';
 import { openWindow } from '..';
 import { dataURLtoBlob, urlToBase64 } from './base64Conver';
+import { promiseTimeout } from '@vueuse/shared';
+
+const [openLoading, closeLoading] = useLoading({
+  target: document.body,
+  props: { tip: '正在下载数据，请稍候' },
+});
 
 /**
  * Download online pictures
@@ -93,4 +100,17 @@ export function downloadByUrl({
 
   openWindow(url, { target });
   return true;
+}
+
+export async function downloadExcel(func: (...args: any) => Promise<Blob>, filename: string) {
+  openLoading();
+  try {
+    await promiseTimeout(1500);
+    const data = await func();
+    downloadByData(data, filename);
+  } catch (error) {
+    //
+  } finally {
+    closeLoading();
+  }
 }

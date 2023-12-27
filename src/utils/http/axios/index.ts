@@ -19,10 +19,15 @@ import { joinTimestamp, formatRequestDate } from './helper';
 import { useUserStoreWithOut } from '@/store/modules/user';
 import { AxiosRetry } from '@/utils/http/axios/axiosRetry';
 import axios from 'axios';
+import { useLocale } from '@/locales/useLocale';
+import { unref } from 'vue';
+import { encryptBase64, encryptWithAes, generateAesKey } from '@/utils/crypto';
+import { encrypt } from '@/utils/jsencrypt';
 
 const globSetting = useGlobSetting();
 const urlPrefix = globSetting.urlPrefix;
 const { createMessage, createErrorModal, createSuccessModal } = useMessage();
+const { getLocale } = useLocale();
 
 /**
  * @description: 数据处理，方便区分多种处理方式
@@ -45,18 +50,19 @@ const transform: AxiosTransform = {
     }
     // 错误的时候返回
 
-    const { data } = res;
-    if (!data) {
+    const axiosResponseData = res.data;
+
+    if (!axiosResponseData) {
       // return '[HTTP] Request has no return value';
       throw new Error(t('sys.api.apiRequestFailed'));
     }
     //  这里 code，result，message为 后台统一的字段，需要在 types.ts内修改为项目自己的接口返回格式
-    const { code, result, message } = data;
+    const { code, data, msg, ...extraData } = axiosResponseData;
 
     // 这里逻辑可以根据项目进行修改
-    const hasSuccess = data && Reflect.has(data, 'code') && code === ResultEnum.SUCCESS;
+    const hasSuccess = Reflect.has(axiosResponseData, 'code') && code === ResultEnum.SUCCESS;
     if (hasSuccess) {
-      let successMsg = message;
+      let successMsg = msg;
 
       if (isNull(successMsg) || isUndefined(successMsg) || isEmpty(successMsg)) {
         successMsg = t(`sys.api.operationSuccess`);
@@ -67,21 +73,24 @@ const transform: AxiosTransform = {
       } else if (options.successMessageMode === 'message') {
         createMessage.success(successMsg);
       }
-      return result;
+
+      if (data) return data;
+
+      return extraData;
     }
 
     // 在此处根据自己项目的实际情况对不同的code执行不同的操作
     // 如果不希望中断当前请求，请return数据，否则直接抛出异常即可
     let timeoutMsg = '';
     switch (code) {
-      case ResultEnum.TIMEOUT:
+      case ResultEnum.UNAUTHORIZED:
         timeoutMsg = t('sys.api.timeoutMessage');
         const userStore = useUserStoreWithOut();
         userStore.logout(true);
         break;
       default:
-        if (message) {
-          timeoutMsg = message;
+        if (msg) {
+          timeoutMsg = msg;
         }
     }
 
@@ -130,9 +139,13 @@ const transform: AxiosTransform = {
           config.data = data;
           config.params = params;
         } else {
-          // 非GET请求如果没有提供data，则将params视为data
-          config.data = params;
-          config.params = undefined;
+          if (config.method?.toUpperCase() === RequestEnum.PUT) {
+            // 如果当前是put请求，不做任何处理
+          } else {
+            // 非GET请求如果没有提供data，则将params视为data
+            config.data = params;
+            config.params = undefined;
+          }
         }
         if (joinParamsToUrl) {
           config.url = setObjToUrlParams(
@@ -153,6 +166,11 @@ const transform: AxiosTransform = {
    * @description: 请求拦截器处理
    */
   requestInterceptors: (config, options) => {
+    const { isEncrypt } = (config as Recordable)?.requestOptions || {};
+    // 对应国际化资源文件后缀
+    config.headers.set('Content-Language', unref(getLocale));
+    // 客户端appid
+    config.headers.set('clientid', globSetting.clientId);
     // 请求之前处理config
     const token = getToken();
     if (token && (config as Recordable)?.requestOptions?.withToken !== false) {
@@ -160,6 +178,19 @@ const transform: AxiosTransform = {
       (config as Recordable).headers.Authorization = options.authenticationScheme
         ? `${options.authenticationScheme} ${token}`
         : token;
+    }
+    if (
+      isEncrypt &&
+      (config.method?.toUpperCase() === RequestEnum.POST ||
+        config.method?.toUpperCase() === RequestEnum.PUT)
+    ) {
+      // 生成 AES 密钥
+      const aesKey = generateAesKey();
+      config.headers['encrypt-key'] = encrypt(encryptBase64(aesKey));
+      config.data =
+        typeof config.data === 'object'
+          ? encryptWithAes(JSON.stringify(config.data), aesKey)
+          : encryptWithAes(config.data, aesKey);
     }
     return config;
   },
@@ -229,7 +260,7 @@ function createAxios(opt?: Partial<CreateAxiosOptions>) {
         // See https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication#authentication_schemes
         // authentication schemes，e.g: Bearer
         // authenticationScheme: 'Bearer',
-        authenticationScheme: '',
+        authenticationScheme: 'Bearer',
         timeout: 10 * 1000,
         // 基础接口地址
         // baseURL: globSetting.apiUrl,

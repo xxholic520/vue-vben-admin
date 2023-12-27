@@ -1,26 +1,24 @@
-import type { UserInfo } from '#/store';
-import type { ErrorMessageMode } from '#/axios';
-import { defineStore } from 'pinia';
 import { store } from '@/store';
-import { RoleEnum } from '@/enums/roleEnum';
-import { PageEnum } from '@/enums/pageEnum';
+import { UserInfo } from '@/api/system/user/types';
 import { ROLES_KEY, TOKEN_KEY, USER_INFO_KEY } from '@/enums/cacheEnum';
 import { getAuthCache, setAuthCache } from '@/utils/auth';
-import { GetUserInfoModel, LoginParams } from '@/api/sys/model/userModel';
-import { doLogout, getUserInfo, loginApi } from '@/api/sys/user';
-import { useI18n } from '@/hooks/web/useI18n';
-import { useMessage } from '@/hooks/web/useMessage';
+import { defineStore } from 'pinia';
+import { LoginParams } from '@/api/auth/model';
+import { ErrorMessageMode } from '#/axios';
+import { getUserInfo, login as loginApi, logout as logoutApi } from '@/api/auth';
 import { router } from '@/router';
-import { usePermissionStore } from '@/store/modules/permission';
+import { PageEnum } from '@/enums/pageEnum';
+import { usePermissionStore } from './permission';
 import { RouteRecordRaw } from 'vue-router';
 import { PAGE_NOT_FOUND_ROUTE } from '@/router/routes/basic';
-import { isArray } from '@/utils/is';
+import { useMessage } from '@/hooks/web/useMessage';
+import { useI18n } from '@/hooks/web/useI18n';
 import { h } from 'vue';
 
 interface UserState {
   userInfo: Nullable<UserInfo>;
   token?: string;
-  roleList: RoleEnum[];
+  roleList: string[];
   sessionTimeout?: boolean;
   lastUpdateTime: number;
 }
@@ -28,15 +26,10 @@ interface UserState {
 export const useUserStore = defineStore({
   id: 'app-user',
   state: (): UserState => ({
-    // user info
     userInfo: null,
-    // token
     token: undefined,
-    // roleList
     roleList: [],
-    // Whether the login expired
     sessionTimeout: false,
-    // Last fetch time
     lastUpdateTime: 0,
   }),
   getters: {
@@ -46,8 +39,8 @@ export const useUserStore = defineStore({
     getToken(state): string {
       return state.token || getAuthCache<string>(TOKEN_KEY);
     },
-    getRoleList(state): RoleEnum[] {
-      return state.roleList.length > 0 ? state.roleList : getAuthCache<RoleEnum[]>(ROLES_KEY);
+    getRoleList(state): string[] {
+      return state.roleList.length > 0 ? state.roleList : getAuthCache<string[]>(ROLES_KEY);
     },
     getSessionTimeout(state): boolean {
       return !!state.sessionTimeout;
@@ -61,14 +54,14 @@ export const useUserStore = defineStore({
       this.token = info ? info : ''; // for null or undefined value
       setAuthCache(TOKEN_KEY, info);
     },
-    setRoleList(roleList: RoleEnum[]) {
-      this.roleList = roleList;
-      setAuthCache(ROLES_KEY, roleList);
-    },
     setUserInfo(info: UserInfo | null) {
       this.userInfo = info;
       this.lastUpdateTime = new Date().getTime();
       setAuthCache(USER_INFO_KEY, info);
+    },
+    setRoleList(roleList: string[]) {
+      this.roleList = roleList;
+      setAuthCache(ROLES_KEY, roleList);
     },
     setSessionTimeout(flag: boolean) {
       this.sessionTimeout = flag;
@@ -79,32 +72,32 @@ export const useUserStore = defineStore({
       this.roleList = [];
       this.sessionTimeout = false;
     },
-    /**
-     * @description: login
-     */
-    async login(
-      params: LoginParams & {
-        goHome?: boolean;
-        mode?: ErrorMessageMode;
-      },
-    ): Promise<GetUserInfoModel | null> {
+    async login(params: LoginParams & { goHome?: boolean; mode?: ErrorMessageMode }) {
       try {
-        const { goHome = true, mode, ...loginParams } = params;
-        const data = await loginApi(loginParams, mode);
-        const { token } = data;
-
-        // save token
-        this.setToken(token);
+        const { goHome = true, mode, ...loginData } = params;
+        const data = await loginApi(loginData, mode);
+        const { access_token } = data;
+        this.setToken(access_token);
         return this.afterLoginAction(goHome);
       } catch (error) {
         return Promise.reject(error);
       }
     },
-    async afterLoginAction(goHome?: boolean): Promise<GetUserInfoModel | null> {
+    async logout(goLogin = false) {
+      if (this.getToken) {
+        try {
+          await logoutApi();
+        } catch (error) {
+          console.log('注销Token失败');
+        }
+        this.setToken(undefined);
+        this.setUserInfo(null);
+        goLogin && router.push(PageEnum.BASE_LOGIN);
+      }
+    },
+    async afterLoginAction(goHome?: boolean) {
       if (!this.getToken) return null;
-      // get user info
-      const userInfo = await this.getUserInfoAction();
-
+      await this.getUserInfoAction();
       const sessionTimeout = this.sessionTimeout;
       if (sessionTimeout) {
         this.setSessionTimeout(false);
@@ -118,44 +111,19 @@ export const useUserStore = defineStore({
           router.addRoute(PAGE_NOT_FOUND_ROUTE as unknown as RouteRecordRaw);
           permissionStore.setDynamicAddedRoute(true);
         }
-        goHome && (await router.replace(userInfo?.homePath || PageEnum.BASE_HOME));
+        goHome && (await router.replace(PageEnum.BASE_HOME));
       }
-      return userInfo;
     },
-    async getUserInfoAction(): Promise<UserInfo | null> {
+    async getUserInfoAction() {
       if (!this.getToken) return null;
       const userInfo = await getUserInfo();
       const { roles = [] } = userInfo;
-      if (isArray(roles)) {
-        const roleList = roles.map((item) => item.value) as RoleEnum[];
-        this.setRoleList(roleList);
-      } else {
-        userInfo.roles = [];
-        this.setRoleList([]);
-      }
+      const permissionStore = usePermissionStore();
+      permissionStore.setPermCodeList(userInfo?.permissions ?? []);
+      this.setRoleList(roles);
       this.setUserInfo(userInfo);
       return userInfo;
     },
-    /**
-     * @description: logout
-     */
-    async logout(goLogin = false) {
-      if (this.getToken) {
-        try {
-          await doLogout();
-        } catch {
-          console.log('注销Token失败');
-        }
-      }
-      this.setToken(undefined);
-      this.setSessionTimeout(false);
-      this.setUserInfo(null);
-      goLogin && router.push(PageEnum.BASE_LOGIN);
-    },
-
-    /**
-     * @description: Confirm before logging out
-     */
     confirmLoginOut() {
       const { createConfirm } = useMessage();
       const { t } = useI18n();

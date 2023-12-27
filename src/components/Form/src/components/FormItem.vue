@@ -384,8 +384,8 @@
             return slot
               ? getSlot(slots, slot, unref(getValues), opts)
               : render
-              ? render(unref(getValues), opts)
-              : renderComponent();
+                ? render(unref(getValues), opts)
+                : renderComponent();
           };
 
           const showSuffix = !!suffix;
@@ -436,8 +436,8 @@
           return colSlot
             ? getSlot(slots, colSlot, values, opts)
             : renderColContent
-            ? renderColContent(values, opts)
-            : renderItem();
+              ? renderColContent(values, opts)
+              : renderItem();
         };
 
         return (

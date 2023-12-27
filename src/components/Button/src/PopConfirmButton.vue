@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { computed, defineComponent, h, unref } from 'vue';
+  import { computed, defineComponent, h, ref, unref, watchEffect } from 'vue';
   import BasicButton from './BasicButton.vue';
   import { Popconfirm } from 'ant-design-vue';
   import { extendSlots } from '@/utils/helper/tsxHelper';
@@ -16,6 +16,11 @@
       type: Boolean,
       default: true,
     },
+
+    times: {
+      type: [Number, Boolean],
+      default: () => 3,
+    },
   };
 
   export default defineComponent({
@@ -25,16 +30,40 @@
     setup(props, { slots }) {
       const { t } = useI18n();
       const attrs = useAttrs();
+      const times = ref(props.times);
 
       // get inherit binding value
       const getBindValues = computed(() => {
         return Object.assign(
           {
-            okText: t('common.okText'),
+            okText: unref(times) ? `${t('common.okText')}(${unref(times)})` : t('common.okText'),
             cancelText: t('common.cancelText'),
           },
-          { ...props, ...unref(attrs) },
+          {
+            ...props,
+            ...unref(attrs),
+            ...(unref(times)
+              ? {
+                  onConfirm: async () => {
+                    if (typeof times.value === 'number' && --times.value <= 0) {
+                      return unref(attrs)
+                        ?.onConfirm?.()
+                        ?.catch(() => {
+                          times.value = props.times;
+                        });
+                    }
+                    return Promise.reject(new Error('popconfirm times limit'));
+                  },
+                }
+              : {}),
+          },
         );
+      });
+
+      watchEffect(() => {
+        if (!unref(attrs).open || !unref(attrs).visible) {
+          times.value = props.times;
+        }
       });
 
       return () => {

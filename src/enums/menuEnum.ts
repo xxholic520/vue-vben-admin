@@ -48,3 +48,19 @@ export enum MixSidebarTriggerEnum {
   HOVER = 'hover',
   CLICK = 'click',
 }
+
+// 后端定义菜单类型
+export enum TypeEnum {
+  /**
+   * 目录
+   */
+  M = 'M',
+  /**
+   * 菜单
+   */
+  C = 'C',
+  /**
+   * 按钮
+   */
+  F = 'F',
+}

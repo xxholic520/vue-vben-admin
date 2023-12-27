@@ -197,6 +197,31 @@ export function useTree(treeDataRef: Ref<TreeDataItem[]>, getFieldNames: Compute
     });
     return selectedNode || null;
   }
+
+  // 获取父节点
+  function getFatherKeys(nodeKey: string | number, list?: TreeDataItem[]): KeyType[] {
+    const keys: KeyType[] = [];
+    const treeData = list || unref(treeDataRef);
+    const { key: keyField, children: childrenField } = unref(getFieldNames);
+    // if (!childrenField || !keyField) return keys;
+    function loopFn(arr: TreeDataItem[], id: string | number) {
+      for (let index = 0; index < arr.length; index++) {
+        const node = arr[index];
+        if (id === node[keyField!]) {
+          loopFn(treeData, node.parentId);
+          keys.push(node[keyField!]);
+          break;
+        } else {
+          if (node[childrenField!]) {
+            loopFn(node[childrenField!], id);
+          }
+        }
+      }
+    }
+    loopFn(treeData, nodeKey);
+    return keys;
+  }
+
   return {
     deleteNodeByKey,
     insertNodeByKey,
@@ -207,5 +232,7 @@ export function useTree(treeDataRef: Ref<TreeDataItem[]>, getFieldNames: Compute
     getChildrenKeys,
     getEnabledKeys,
     getSelectedNode,
+
+    getFatherKeys,
   };
 }

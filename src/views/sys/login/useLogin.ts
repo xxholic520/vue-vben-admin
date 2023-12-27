@@ -4,8 +4,11 @@ import type {
   NamePath,
   Rule as ValidationRule,
 } from 'ant-design-vue/lib/form/interface';
-import { ref, computed, unref, Ref } from 'vue';
+import { ref, computed, unref, Ref, MaybeRef, onMounted } from 'vue';
 import { useI18n } from '@/hooks/web/useI18n';
+import { getTenantList } from '@/api/auth';
+import { TenantVO } from '@/api/auth/model';
+import { captchaImage } from '@/api/auth/captcha';
 
 export enum LoginStateEnum {
   LOGIN,
@@ -57,6 +60,7 @@ export function useFormRules(formData?: Recordable) {
   const getPasswordFormRule = computed(() => createRule(t('sys.login.passwordPlaceholder')));
   const getSmsFormRule = computed(() => createRule(t('sys.login.smsPlaceholder')));
   const getMobileFormRule = computed(() => createRule(t('sys.login.mobilePlaceholder')));
+  const getVerifyCodeRule = computed(() => createRule(t('sys.login.verficyCodePlaceholder')));
 
   const validatePolicy = async (_: RuleObject, value: boolean) => {
     return !value ? Promise.reject(t('sys.login.policyPlaceholder')) : Promise.resolve();
@@ -79,6 +83,7 @@ export function useFormRules(formData?: Recordable) {
     const passwordFormRule = unref(getPasswordFormRule);
     const smsFormRule = unref(getSmsFormRule);
     const mobileFormRule = unref(getMobileFormRule);
+    const codeFormRule = unref(getVerifyCodeRule);
 
     const mobileRule = {
       sms: smsFormRule,
@@ -88,7 +93,7 @@ export function useFormRules(formData?: Recordable) {
       // register form rules
       case LoginStateEnum.REGISTER:
         return {
-          account: accountFormRule,
+          username: accountFormRule,
           password: passwordFormRule,
           confirmPassword: [
             { validator: validateConfirmPassword(formData?.password), trigger: 'change' },
@@ -100,7 +105,7 @@ export function useFormRules(formData?: Recordable) {
       // reset password form rules
       case LoginStateEnum.RESET_PASSWORD:
         return {
-          account: accountFormRule,
+          username: accountFormRule,
           ...mobileRule,
         };
 
@@ -111,8 +116,9 @@ export function useFormRules(formData?: Recordable) {
       // login form rules
       default:
         return {
-          account: accountFormRule,
+          username: accountFormRule,
           password: passwordFormRule,
+          code: codeFormRule,
         };
     }
   });
@@ -127,4 +133,43 @@ function createRule(message: string): ValidationRule[] {
       trigger: 'change',
     },
   ];
+}
+
+export function useTenantState() {
+  const tenantEnabled = ref(false);
+  const tenantList = ref<TenantVO[]>([]);
+
+  getTenantList().then((data) => {
+    tenantEnabled.value = data.tenantEnabled;
+    tenantList.value = data.voList;
+  });
+
+  return {
+    tenantEnabled,
+    tenantList,
+  };
+}
+
+export function useCaptchaImageState(formData: MaybeRef<Recordable>) {
+  const captchaEnabled = ref(false);
+  const imageInfo = ref('');
+
+  async function getImageCode() {
+    const data = await captchaImage();
+    captchaEnabled.value = data.captchaEnabled === undefined ? true : data.captchaEnabled;
+    if (captchaEnabled.value) {
+      unref(formData).uuid = data.uuid;
+      imageInfo.value = `data:image/gif;base64,${data.img}`;
+    }
+  }
+
+  onMounted(() => {
+    getImageCode();
+  });
+
+  return {
+    captchaEnabled,
+    imageInfo,
+    getImageCode,
+  };
 }

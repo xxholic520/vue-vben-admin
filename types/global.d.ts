@@ -68,11 +68,14 @@ declare global {
     VITE_PUBLIC_PATH: string;
     VITE_GLOB_APP_TITLE: string;
     VITE_BUILD_COMPRESS: 'gzip' | 'brotli' | 'none';
+    VITE_APP_WEBSOCKET: boolean;
   }
 
   declare function parseInt(s: string | number, radix?: number): number;
 
   declare function parseFloat(string: string | number): number;
+
+  declare type Key = string | number;
 
   namespace JSX {
     // tslint:disable no-empty-interface
