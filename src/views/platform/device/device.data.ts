@@ -3,6 +3,17 @@ import { BasicColumn, FormSchema } from '@/components/Table';
 import { useRender } from '@/hooks/component/useRender';
 import { useDict } from '@/utils/helper/dictHelper';
 
+export enum DeviceType {
+  Printer = '0',
+  RfidReader = '1',
+}
+
+export enum DevicePortType {
+  Web = '0',
+  Serial = '1',
+  Usb = '2',
+}
+
 const dictState = useDict('dsp_device_status', 'dsp_device_port_type', 'dsp_device_type');
 
 // 列表
@@ -12,7 +23,7 @@ export const columns: BasicColumn[] = [
     dataIndex: 'id',
   },
   {
-    title: '所属设备服务器',
+    title: '所属设备服务',
     dataIndex: 'withServer',
   },
   {
@@ -36,6 +47,10 @@ export const columns: BasicColumn[] = [
   {
     title: '设备地址',
     dataIndex: 'devPortAddr',
+    ellipsis: true,
+    customRender: ({ value }) => {
+      return useRender().renderTooltip(value, 'topLeft');
+    },
   },
   {
     title: '设备端口号',
@@ -149,6 +164,9 @@ export const formSchema: FormSchema[] = [
       api: getDevServerOptions,
       labelField: 'serverName',
       valueField: 'id',
+      getPopupContainer: (triggerNode) => {
+        return triggerNode.parentNode;
+      },
     }),
   },
   {
@@ -159,6 +177,7 @@ export const formSchema: FormSchema[] = [
     componentProps: () => ({
       placeholder: '请选择设备类型',
       options: dictState.value.dsp_device_type,
+      getPopupContainer: (triggerNode) => triggerNode.parentNode,
     }),
   },
   {
@@ -169,6 +188,7 @@ export const formSchema: FormSchema[] = [
     componentProps: () => ({
       placeholder: '请选择设备端口类型',
       options: dictState.value.dsp_device_port_type,
+      getPopupContainer: (triggerNode) => triggerNode.parentNode,
     }),
   },
   {
@@ -178,16 +198,14 @@ export const formSchema: FormSchema[] = [
     component: 'Input',
     componentProps: {
       placeholder: '请输入设备名称',
+      autocomplete: 'off',
     },
   },
   {
     label: '设备地址',
     field: 'devPortAddr',
-    required: false,
-    component: 'Input',
-    componentProps: {
-      placeholder: '请输入设备地址',
-    },
+    required: true,
+    slot: 'DevPortAddr_CustomSlot',
   },
   {
     label: '设备端口号',

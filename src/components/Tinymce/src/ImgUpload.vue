@@ -23,8 +23,11 @@
   import { useGlobSetting } from '@/hooks/setting';
   import { useI18n } from '@/hooks/web/useI18n';
   import { getToken } from '@/utils/auth';
+  import { useMessage } from '@/hooks/web/useMessage';
 
   defineOptions({ name: 'TinymceImageUpload' });
+
+  const { createMessage } = useMessage();
 
   const props = defineProps({
     fullscreen: {
@@ -60,7 +63,7 @@
   function handleChange(info: Record<string, any>) {
     const file = info.file;
     const status = file?.status;
-    const url = file?.response?.url;
+    // const url = file?.response?.url;
     const name = file?.name;
 
     if (status === 'uploading') {
@@ -69,7 +72,14 @@
         uploading = true;
       }
     } else if (status === 'done') {
-      emit('done', name, url);
+      const { response } = file;
+      const { code, msg = '服务器错误', data } = response;
+      if (code === 200) {
+        const { url } = data;
+        emit('done', name, url);
+      } else {
+        createMessage.error(msg);
+      }
       uploading = false;
     } else if (status === 'error') {
       emit('error');

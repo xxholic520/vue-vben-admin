@@ -1,6 +1,7 @@
 import { BasicColumn, FormSchema } from '@/components/Table';
 import { useRender } from '@/hooks/component/useRender';
-
+import { h } from 'vue';
+import { Badge } from 'ant-design-vue';
 // 列表
 export const columns: BasicColumn[] = [
   {
@@ -30,6 +31,14 @@ export const columns: BasicColumn[] = [
       return useRender().renderDateTime(record.createTime);
     },
   },
+  {
+    title: '在线状态',
+    dataIndex: 'onlineStatus',
+    customRender: ({ value }) => {
+      const onlineStatusText = value === '0' ? '离线' : '在线';
+      return h(Badge, { status: value === '0' ? 'default' : 'success', text: onlineStatusText });
+    },
+  },
 ];
 
 // 搜索
@@ -40,6 +49,18 @@ export const searchFormSchema: FormSchema[] = [
     component: 'Input',
     componentProps: {
       placeholder: '请输入服务器名称',
+    },
+  },
+  {
+    label: '在线状态',
+    field: 'onlineStatus',
+    component: 'Select',
+    componentProps: {
+      placeholder: '请选择在线状态',
+      options: [
+        { label: '在线', value: '1' },
+        { label: '离线', value: '0' },
+      ],
     },
   },
 ];

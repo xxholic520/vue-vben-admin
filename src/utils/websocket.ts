@@ -3,6 +3,12 @@ import { computed, unref, watch } from 'vue';
 import { useUserStoreWithOut } from '@/store/modules/user';
 import { useMessage } from '@/hooks/web/useMessage';
 
+// 返回状态码
+export enum WebsocketResponseCode {
+  Success = 200,
+  Fail = 500,
+}
+
 const { notification } = useMessage();
 
 const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
@@ -38,7 +44,13 @@ export const useXWebsocket = () => {
 
   if (!websocket) {
     websocket = useWebSocket(getUrl, {
-      autoReconnect: true,
+      autoReconnect: {
+        retries: 5,
+        delay: 10000,
+        onFailed: () => {
+          userStore.logout(true);
+        },
+      },
       heartbeat: {
         message: JSON.stringify({ type: 'ping' }),
         interval: 10000,
@@ -48,6 +60,8 @@ export const useXWebsocket = () => {
         if (e.data.indexOf('topic') > 0) {
           const { topic } = JSON.parse(e.data);
           _dep.notify(topic, e.data);
+        } else if (e.data.indexOf('ping') > 0) {
+          return;
         } else {
           notification.success({
             message: '消息',

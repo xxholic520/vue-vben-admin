@@ -1,24 +1,24 @@
 <template>
   <PageWrapper dense>
     <BasicTable @register="registerTable">
-      <template #toolbar>
-        <a-button
-          type="primary"
-          :pre-icon="IconEnum.ADD"
-          @click="handleAdd"
-          v-auth="'system:notice:add'"
-        >
-          新增公告
-        </a-button>
-        <a-button
-          :preIcon="IconEnum.DELETE"
-          danger
-          @click="multipleRemove(noticeRemove)"
-          :disabled="!selected"
-          v-auth="'system:notice:remove'"
-        >
-          选中删除
-        </a-button>
+      <template #tableTitle>
+        <Space>
+          <a-button
+            type="primary"
+            :pre-icon="IconEnum.ADD"
+            @click="handleAdd"
+            v-auth="'system:oss:add'"
+            >新增配置</a-button
+          >
+          <a-button
+            :preIcon="IconEnum.DELETE"
+            danger
+            @click="multipleRemove(ossConfigRemove)"
+            :disabled="!selected"
+            v-auth="'system:oss:edit'"
+            >选中删除</a-button
+          >
+        </Space>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'action'">
@@ -28,17 +28,17 @@
               {
                 label: '修改',
                 icon: IconEnum.EDIT,
-                auth: 'system:notice:edit',
+                auth: 'system:oss:edit',
                 onClick: handleEdit.bind(null, record),
               },
               {
                 label: '删除',
                 icon: IconEnum.DELETE,
                 color: 'error',
-                auth: 'system:notice:remove',
+                auth: 'system:oss:edit',
                 popConfirm: {
                   placement: 'left',
-                  title: `是否删除公告[${record.noticeTitle}]?`,
+                  title: `是否删除oss配置[${record.configKey}]?`,
                   confirm: handleDelete.bind(null, record),
                 },
               },
@@ -47,41 +47,48 @@
         </template>
       </template>
     </BasicTable>
-    <NoticeModal @register="registerModal" @reload="reload" />
+    <OssConfigModal @register="registerModal" @reload="reload" />
   </PageWrapper>
 </template>
 
 <script setup lang="ts">
   import { PageWrapper } from '@/components/Page';
   import { BasicTable, useTable, TableAction } from '@/components/Table';
-  import { noticeList, noticeRemove } from '@/api/system/notice';
+  import { Space } from 'ant-design-vue';
+  import { ossConfigList, ossConfigRemove } from '@/api/system/oss/config';
   import { useModal } from '@/components/Modal';
-  import NoticeModal from './NoticeModal.vue';
-  import { formSchems, columns } from './notice.data';
+  import OssConfigModal from './OssConfigModal.vue';
+  import { formSchems, columns } from './oss.config.data';
   import { IconEnum } from '@/enums/appEnum';
   import { computed } from 'vue';
 
-  defineOptions({ name: 'Notice' });
+  defineOptions({ name: 'OssConfigIndex' });
 
-  const [registerTable, { reload, multipleRemove, getSelectRowKeys }] = useTable({
+  const [registerTable, { reload, getSelectRowKeys, multipleRemove }] = useTable({
     rowSelection: {
       type: 'checkbox',
     },
-    showIndexColumn: true,
-    api: noticeList,
-    rowKey: 'noticeId',
+    showIndexColumn: false,
+    api: ossConfigList,
+    rowKey: 'ossConfigId',
     useSearchForm: true,
     bordered: true,
+    beforeFetch: (params: Recordable) => {
+      if (params.status) {
+        params.status = params.status === 'Y' ? 0 : 1;
+      }
+      return params;
+    },
     formConfig: {
       schemas: formSchems,
-      labelWidth: 100,
+      labelWidth: 120,
       baseColProps: {
         span: 6,
       },
     },
     columns: columns,
     actionColumn: {
-      width: 200,
+      width: 160,
       title: '操作',
       key: 'action',
       fixed: 'right',
@@ -101,7 +108,7 @@
   }
 
   async function handleDelete(record: Recordable) {
-    await noticeRemove([record.configId]);
+    await ossConfigRemove([record.ossConfigId]);
     await reload();
   }
 </script>

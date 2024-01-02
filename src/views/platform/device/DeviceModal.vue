@@ -1,9 +1,11 @@
 <script setup lang="ts">
   import { BasicForm, useForm } from '@/components/Form';
   import { BasicModal, useModalInner } from '@/components/Modal';
-  import { formSchema } from './device.data';
+  import { formSchema, DevicePortType } from './device.data';
   import { ref, unref, computed } from 'vue';
   import { getDeviceById, createDevice, updateDevice } from '@/api/platform/device';
+  import { Input } from 'ant-design-vue';
+  import DeviceEnum from './components/DeviceEnum.vue';
 
   const emit = defineEmits(['register', 'success']);
 
@@ -59,7 +61,29 @@
 </script>
 
 <template>
-  <BasicModal v-bind="$attrs" @register="registerModal" :title="getTitle" @ok="handleSubmit">
-    <BasicForm @register="registerForm" />
+  <BasicModal
+    v-bind="$attrs"
+    @register="registerModal"
+    :title="getTitle"
+    :width="600"
+    @ok="handleSubmit"
+  >
+    <BasicForm @register="registerForm">
+      <template #DevPortAddr_CustomSlot="{ values, field, model }">
+        <template
+          v-if="
+            values.withServer &&
+            values.devType &&
+            values.devPortType &&
+            values.devPortType !== DevicePortType.Web
+          "
+        >
+          <DeviceEnum v-model:value="model[field]" :values="values" />
+        </template>
+        <template v-else>
+          <Input v-model:value="model[field]" placeholder="请输入设备地址" autocomplete="off" />
+        </template>
+      </template>
+    </BasicForm>
   </BasicModal>
 </template>

@@ -2,9 +2,11 @@ import { DictTag } from '@/components/Tag';
 import { formatToDate, formatToDateTime } from '@/utils/dateUtil';
 import { DictDataOption } from '@/utils/helper/dictHelper';
 import { VNode, h } from 'vue';
-import { Image as AImage, Switch, Tag } from 'ant-design-vue';
+import { Image as AImage, Switch, Tag, Tooltip } from 'ant-design-vue';
 import { promiseTimeout } from '@vueuse/shared';
 import Icon from '@/components/Icon/Icon.vue';
+import { TooltipPlacement } from 'ant-design-vue/lib/tooltip';
+
 // import { useMessage } from '../web/useMessage';
 
 // const { createConfirm } = useMessage();
@@ -94,6 +96,10 @@ function renderIconSpan(icon: string, value: string, marginLeft = '2px') {
   );
 }
 
+function renderTooltip(value: string, placement: TooltipPlacement = 'top') {
+  return h(Tooltip, { placement, title: value }, () => value);
+}
+
 export function useRender() {
   return {
     renderDictTag,
@@ -104,5 +110,6 @@ export function useRender() {
     renderTag,
     renderTags,
     renderIconSpan,
+    renderTooltip,
   };
 }

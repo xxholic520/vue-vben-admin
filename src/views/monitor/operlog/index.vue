@@ -25,6 +25,7 @@
     useSearchForm: true,
     showTableSetting: true,
     showIndexColumn: true,
+    indexColumnProps: { width: 80 },
     rowSelection: { type: 'checkbox' },
     actionColumn: {
       width: 80,

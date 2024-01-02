@@ -8,7 +8,12 @@
   import { downloadExcel } from '@/utils/file/download';
   import { IconEnum } from '@/enums/appEnum';
   import DeviceModal from './DeviceModal.vue';
-  import { columns, searchFormSchema } from './device.data';
+  import { columns, searchFormSchema, DeviceType } from './device.data';
+  import { WebsocketResponseCode, useXWebsocketFn } from '@/utils/websocket';
+  import { useMessage } from '@/hooks/web/useMessage';
+
+  const { createMessage } = useMessage();
+  const { sendMessageWithCallback } = useXWebsocketFn();
 
   const [registerTable, { reload, getForm, multipleRemove, getSelectRowKeys }] = useTable({
     api: getDeviceList,
@@ -19,7 +24,7 @@
     showIndexColumn: false,
     canResize: true,
     actionColumn: {
-      width: 150,
+      width: 200,
       title: '操作',
       dataIndex: 'action',
       fixed: 'right',
@@ -47,6 +52,56 @@
   async function handleDelete(record: Recordable) {
     await removeDevice(record.id);
     reload();
+  }
+
+  // 打印测试
+  function handlePrintTest(record: Recordable) {
+    const { withServer, devPortAddr } = record;
+    sendMessageWithCallback(
+      `${withServer}/printer/print`,
+      {
+        printerName: devPortAddr,
+        printData: {
+          command: '_thermal_zpl_print_',
+          printdirectly: 'true',
+          print: [
+            {
+              func: 'zpl_set_label_coordinate_orgin',
+              x: 10,
+              y: 0,
+            },
+            {
+              func: 'zpl_set_field_pos',
+              x: 30,
+              y: 0,
+            },
+            {
+              func: 'zpl_text_settings',
+              mode: 1,
+              w: 40,
+              h: 40,
+              name: 'L',
+            },
+            {
+              func: 'zpl_add_field_data',
+              text: '组合打印功能',
+              auto_fex: 1,
+            },
+            {
+              func: 'zpl_add_field_separator',
+            },
+          ],
+        },
+      },
+      (data) => {
+        const res = JSON.parse(data);
+        if (res.code === WebsocketResponseCode.Success) {
+          createMessage.success('操作成功');
+        } else {
+          createMessage.error(res.msg);
+        }
+      },
+    );
   }
 </script>
 
@@ -108,6 +163,17 @@
                 },
               },
             ]"
+            :drop-down-actions="
+              record.devType === DeviceType.Printer
+                ? [
+                    {
+                      label: '打印测试',
+                      icon: 'ant-design:printer-outlined',
+                      onClick: handlePrintTest.bind(null, record),
+                    },
+                  ]
+                : []
+            "
           />
         </template>
       </template>

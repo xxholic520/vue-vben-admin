@@ -163,12 +163,13 @@
     api: getUserList,
     rowKey: 'userId',
     useSearchForm: true,
+    bordered: true,
     formConfig: {
       schemas: schemas,
       baseColProps: {
-        span: 8,
+        span: 6,
       },
-      labelWidth: 80,
+      labelWidth: 0,
       resetFunc: async () => {
         data.selectDeptId = [];
         await reload();

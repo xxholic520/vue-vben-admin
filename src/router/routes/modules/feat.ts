@@ -84,6 +84,26 @@ const feat: AppRouteModule[] = [
       },
     ],
   },
+  {
+    path: '/oss-config',
+    name: 'OssConfig',
+    component: LAYOUT,
+    meta: {
+      title: 'OSS配置管理',
+    },
+    children: [
+      {
+        path: 'index',
+        name: 'OssConfigIndex',
+        component: () => import('@/views/system/oss/OssConfig.vue'),
+        meta: {
+          title: 'OSS配置管理',
+          currentActiveMenu: '/system/oss',
+          hideMenu: true,
+        },
+      },
+    ],
+  },
 ];
 
 export default feat;

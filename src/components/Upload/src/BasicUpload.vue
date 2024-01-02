@@ -2,7 +2,8 @@
   <div>
     <Space>
       <a-button type="primary" @click="openUploadModal" preIcon="carbon:cloud-upload">
-        {{ t('component.upload.upload') }}
+        <slot v-if="$slots.default"></slot>
+        <template v-else>{{ t('component.upload.upload') }}</template>
       </a-button>
       <Tooltip placement="bottom" v-if="showPreview">
         <template #title>
