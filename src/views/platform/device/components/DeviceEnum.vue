@@ -3,7 +3,7 @@
   import { useVModel } from '@vueuse/core';
   import { ref, nextTick } from 'vue';
   import { InputSearch, Button } from 'ant-design-vue';
-  import { WebsocketResponseCode, useXWebsocketFn } from '@/utils/websocket';
+  import { useXWebsocketFn } from '@/utils/websocket';
   import { DeviceType } from '../device.data';
   import { useMessage } from '@/hooks/web/useMessage';
   import BasicModal from '@/components/Modal/src/BasicModal.vue';
@@ -18,7 +18,7 @@
     values: propTypes.object.def({}),
   });
 
-  const { sendMessageWithCallback } = useXWebsocketFn();
+  const { asyncSendMessage } = useXWebsocketFn(); // sendMessageWithCallback
   const { createMessage } = useMessage();
   const loading = ref(false);
 
@@ -55,13 +55,10 @@
 
     if (topic) {
       loading.value = true;
-      sendMessageWithCallback(topic, { enumType: devPortType }, (data) => {
-        const res = JSON.parse(data);
-        if (res.code === WebsocketResponseCode.Success) {
-          const { names = [] } = res.data || {};
-
+      asyncSendMessage(topic, { enumType: devPortType })
+        .then((data: any) => {
+          const { names = [] } = data;
           openModal(true);
-
           nextTick(() => {
             updateSchema({
               field: 'deviceName',
@@ -70,11 +67,34 @@
               },
             });
           });
-        } else {
-          createMessage.error(res.msg);
-        }
-        loading.value = false;
-      });
+        })
+        .catch((err) => {
+          createMessage.error(err.message);
+        })
+        .finally(() => {
+          loading.value = false;
+        });
+      // loading.value = true;
+      // sendMessageWithCallback(topic, { enumType: devPortType }, (data) => {
+      //   const res = JSON.parse(data);
+      //   if (res.code === WebsocketResponseCode.Success) {
+      //     const { names = [] } = res.data || {};
+
+      //     openModal(true);
+
+      //     nextTick(() => {
+      //       updateSchema({
+      //         field: 'deviceName',
+      //         componentProps: {
+      //           options: names.map((v) => ({ label: v, value: v })),
+      //         },
+      //       });
+      //     });
+      //   } else {
+      //     createMessage.error(res.msg);
+      //   }
+      //   loading.value = false;
+      // });
     }
   }
 

@@ -94,8 +94,22 @@ export const useXWebsocketFn = () => {
     websocket?.send?.(JSON.stringify({ topic, data }));
   };
 
+  const asyncSendMessage = (topic: string, data: any) => {
+    return new Promise((resolve, reject) => {
+      sendMessageWithCallback(topic, data, (res) => {
+        res = JSON.parse(res);
+        if (res.code === WebsocketResponseCode.Success) {
+          resolve(res.data);
+        } else {
+          reject(new Error(res.msg));
+        }
+      });
+    });
+  };
+
   return {
     getIsOpen,
     sendMessageWithCallback,
+    asyncSendMessage,
   };
 };

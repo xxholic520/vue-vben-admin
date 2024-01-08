@@ -11,6 +11,9 @@
 
     <template #overlay>
       <Menu @click="handleMenuClick">
+        <MenuItem key="user-profile" icon="ant-design:user-outlined" text="个人中心" />
+        <MenuItem key="user-profile" icon="ant-design:setting-outlined" text="个人设置" />
+
         <MenuItem
           key="doc"
           :text="t('layout.header.dropdownItemDoc')"
@@ -55,8 +58,9 @@
   import { propTypes } from '@/utils/propTypes';
   import { openWindow } from '@/utils';
   import { createAsyncComponent } from '@/utils/factory/createAsyncComponent';
+  import { useGo } from '@/hooks/web/usePage';
 
-  type MenuEvent = 'logout' | 'doc' | 'lock' | 'api';
+  type MenuEvent = 'logout' | 'doc' | 'lock' | 'api' | 'user-profile' | 'user-setting';
 
   const MenuItem = createAsyncComponent(() => import('./DropMenuItem.vue'));
   const LockAction = createAsyncComponent(() => import('../lock/LockModal.vue'));
@@ -72,6 +76,7 @@
   const { t } = useI18n();
   const { getShowDoc, getUseLockPage, getShowApi } = useHeaderSetting();
   const userStore = useUserStore();
+  const go = useGo();
 
   const getUserInfo = computed(() => {
     const { nickName: realName = '', avatar, remark: desc } = userStore.getUserInfo.user || {};
@@ -112,6 +117,12 @@
         break;
       case 'api':
         handleApi();
+        break;
+      case 'user-profile':
+        go('/user/profile');
+        break;
+      case 'user-setting':
+        go('/user/setting');
         break;
     }
   }

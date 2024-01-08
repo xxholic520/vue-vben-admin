@@ -21,10 +21,18 @@ export const columns: BasicColumn[] = [
   {
     title: '设备ID',
     dataIndex: 'id',
+    ellipsis: true,
+    customRender({ value }) {
+      return useRender().renderTooltip(value, 'topLeft');
+    },
   },
   {
     title: '所属设备服务',
     dataIndex: 'withServer',
+    ellipsis: true,
+    customRender({ value }) {
+      return useRender().renderTooltip(value, 'topLeft');
+    },
   },
   {
     title: '设备名称',

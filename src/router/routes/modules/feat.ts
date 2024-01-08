@@ -104,6 +104,46 @@ const feat: AppRouteModule[] = [
       },
     ],
   },
+  {
+    path: '/user/profile',
+    name: 'UserProfile',
+    component: LAYOUT,
+    meta: {
+      title: '个人中心',
+    },
+    children: [
+      {
+        path: '',
+        name: 'UserProfileIndex',
+        component: () => import('@/views/system/user/profile/index.vue'),
+        meta: {
+          title: '个人中心',
+          showTab: false,
+          hideMenu: true,
+        },
+      },
+    ],
+  },
+  {
+    path: '/user/setting',
+    name: 'UserSetting',
+    component: LAYOUT,
+    meta: {
+      title: '个人设置',
+    },
+    children: [
+      {
+        path: '',
+        name: 'UserSettingIndex',
+        component: () => import('@/views/system/user/setting/index.vue'),
+        meta: {
+          title: '个人设置',
+          showTab: false,
+          hideMenu: true,
+        },
+      },
+    ],
+  },
 ];
 
 export default feat;
