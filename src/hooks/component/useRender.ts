@@ -3,9 +3,9 @@ import { formatToDate, formatToDateTime } from '@/utils/dateUtil';
 import { DictDataOption } from '@/utils/helper/dictHelper';
 import { VNode, h } from 'vue';
 import { Image as AImage, Switch, Tag, Tooltip } from 'ant-design-vue';
-import { promiseTimeout } from '@vueuse/shared';
 import Icon from '@/components/Icon/Icon.vue';
 import { TooltipPlacement } from 'ant-design-vue/lib/tooltip';
+import { promiseTimeout } from '@vueuse/core';
 
 // import { useMessage } from '../web/useMessage';
 

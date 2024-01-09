@@ -1,9 +1,9 @@
 <template>
-  <!-- <transition> -->
-  <div :class="prefixCls">
-    <Login sessionTimeout />
-  </div>
-  <!-- </transition> -->
+  <transition>
+    <div :class="prefixCls" v-if="true">
+      <Login sessionTimeout />
+    </div>
+  </transition>
 </template>
 <script lang="ts" setup>
   import { onBeforeUnmount, onMounted, ref } from 'vue';
@@ -27,7 +27,7 @@
 
   onMounted(() => {
     // 记录当前的UserId
-    userId.value = userStore.getUserInfo?.user?.userId;
+    userId.value = userStore.getUserInfo?.user?.userId || 0;
     console.log('Mounted', userStore.getUserInfo);
   });
 

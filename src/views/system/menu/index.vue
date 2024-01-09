@@ -8,7 +8,7 @@
   import { useDrawer } from '@/components/Drawer';
   import { columns, searchFormSchema } from './menu.data';
   import MenuDrawer from './MenuDrawer.vue';
-  import { useToggle } from '@vueuse/shared';
+  import { useToggle } from '@vueuse/core';
   import { unref } from 'vue';
   import { IconEnum } from '@/enums/appEnum';
 

@@ -12,7 +12,7 @@
     <template #overlay>
       <Menu @click="handleMenuClick">
         <MenuItem key="user-profile" icon="ant-design:user-outlined" text="个人中心" />
-        <MenuItem key="user-profile" icon="ant-design:setting-outlined" text="个人设置" />
+        <MenuItem key="user-setting" icon="ant-design:setting-outlined" text="个人设置" />
 
         <MenuItem
           key="doc"

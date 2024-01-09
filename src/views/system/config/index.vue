@@ -9,7 +9,7 @@
   import { useMessage } from '@/hooks/web/useMessage';
   import { useLoading } from '@/components/Loading';
   import { ConfigQuery } from '@/api/system/config/types';
-  import { promiseTimeout } from '@vueuse/shared';
+  import { promiseTimeout } from '@vueuse/core';
   import { downloadByData } from '@/utils/file/download';
   import { IconEnum } from '@/enums/appEnum';
 

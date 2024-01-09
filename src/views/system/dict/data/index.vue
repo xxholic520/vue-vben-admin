@@ -12,7 +12,7 @@
   import TableAction from '@/components/Table/src/components/TableAction.vue';
   import { useMessage } from '@/hooks/web/useMessage';
   import { useLoading } from '@/components/Loading';
-  import { promiseTimeout } from '@vueuse/shared';
+  import { promiseTimeout } from '@vueuse/core';
   import { downloadByData } from '@/utils/file/download';
   import { DictDataQuery } from '@/api/system/dict/data/types';
   import { IconEnum } from '@/enums/appEnum';

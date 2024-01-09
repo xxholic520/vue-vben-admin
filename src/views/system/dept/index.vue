@@ -11,7 +11,7 @@
   import DeptModal from './DeptModal.vue';
   import { columns, searchFormSchema } from './dept.data';
   import { eachTree, listToTree } from '@/utils/helper/treeHelper';
-  import { useToggle } from '@vueuse/shared';
+  import { useToggle } from '@vueuse/core';
 
   const [registerTable, { reload, expandAll, collapseAll }] = useTable({
     api: renderTreeList,

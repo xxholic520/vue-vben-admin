@@ -61,7 +61,7 @@
       `${withServer}/printer/print`,
       {
         printerName: devPortAddr,
-        printData: {
+        printData: JSON.stringify({
           command: '_thermal_zpl_print_',
           printdirectly: 'true',
           print: [
@@ -91,7 +91,7 @@
               func: 'zpl_add_field_separator',
             },
           ],
-        },
+        }),
       },
       (data) => {
         const res = JSON.parse(data);

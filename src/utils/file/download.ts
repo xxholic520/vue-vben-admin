@@ -1,7 +1,7 @@
 import { useLoading } from '@/components/Loading';
 import { openWindow } from '..';
 import { dataURLtoBlob, urlToBase64 } from './base64Conver';
-import { promiseTimeout } from '@vueuse/shared';
+import { promiseTimeout } from '@vueuse/core';
 
 const [openLoading, closeLoading] = useLoading({
   target: document.body,
