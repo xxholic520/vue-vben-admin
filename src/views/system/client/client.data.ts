@@ -75,9 +75,7 @@ export const columns: BasicColumn[] = [
     title: '状态',
     dataIndex: 'status',
     customRender({ record }) {
-      return renderSwitch(record, changeStatus, (newStatusStr) => {
-        return `确认${newStatusStr}客户端[${record.clientKey}]吗?`;
-      });
+      return renderSwitch(record, changeStatus);
     },
   },
 ];

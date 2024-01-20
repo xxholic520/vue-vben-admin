@@ -61,6 +61,7 @@
       `${withServer}/printer/print`,
       {
         printerName: devPortAddr,
+        epc: '1234',
         printData: JSON.stringify({
           command: '_thermal_zpl_print_',
           printdirectly: 'true',

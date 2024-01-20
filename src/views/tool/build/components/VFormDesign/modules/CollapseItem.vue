@@ -35,7 +35,7 @@
   import { IVFormComponent } from '../../../typings/v-form-component';
   import draggable from 'vuedraggable';
   // import { toRefs } from '@vueuse/core';
-  import { Icon } from '/@/components/Icon';
+  import Icon from '@/components/Icon/Icon.vue';
 
   export default defineComponent({
     name: 'CollapseItem',
