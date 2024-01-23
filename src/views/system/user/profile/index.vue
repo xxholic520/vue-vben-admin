@@ -1,16 +1,13 @@
 <script setup lang="ts">
+  import { computed } from 'vue';
   import { useDesign } from '@/hooks/web/useDesign';
   import { useUserStore } from '@/store/modules/user';
-  import { computed } from 'vue';
   import headerImg from '@/assets/images/header.jpg';
-  import { UserVO } from '@/api/system/user/types';
 
   defineOptions({ name: 'UserProfile' });
 
   const userStore = useUserStore();
-  const getUserInfo = computed(() => {
-    return (userStore.getUserInfo.user || {}) as any as UserVO;
-  });
+  const getUserInfo = computed(() => userStore.getUserInfo);
 
   const { prefixCls } = useDesign('account-center');
 </script>

@@ -1,9 +1,8 @@
 import { store } from '@/store';
-import { UserInfo } from '@/api/system/user/types';
 import { ROLES_KEY, TOKEN_KEY, USER_INFO_KEY } from '@/enums/cacheEnum';
 import { getAuthCache, setAuthCache } from '@/utils/auth';
 import { defineStore } from 'pinia';
-import { LoginParams } from '@/api/auth/model';
+import { LoginParams, UserInfo } from '@/api/auth/model';
 import { ErrorMessageMode } from '#/axios';
 import { getUserInfo, login as loginApi, logout as logoutApi } from '@/api/auth';
 import { router } from '@/router';
@@ -117,11 +116,11 @@ export const useUserStore = defineStore({
     async getUserInfoAction() {
       if (!this.getToken) return null;
       const userInfo = await getUserInfo();
-      const { roles = [] } = userInfo;
+      const { roles = [], user } = userInfo;
       const permissionStore = usePermissionStore();
       permissionStore.setPermCodeList(userInfo?.permissions ?? []);
       this.setRoleList(roles);
-      this.setUserInfo(userInfo);
+      this.setUserInfo(user);
       return userInfo;
     },
     confirmLoginOut() {

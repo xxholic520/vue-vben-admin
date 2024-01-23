@@ -79,7 +79,7 @@
   const go = useGo();
 
   const getUserInfo = computed(() => {
-    const { nickName: realName = '', avatar, remark: desc } = userStore.getUserInfo.user || {};
+    const { nickName: realName = '', avatar, remark: desc } = userStore.getUserInfo || {};
     return { realName, avatar: avatar || headerImg, desc };
   });
 
