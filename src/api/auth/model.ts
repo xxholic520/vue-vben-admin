@@ -44,6 +44,7 @@ export interface UserInfo {
   avatar?: string;
   createTime: string;
   remark?: string;
+  homePath?: string;
 }
 
 /**

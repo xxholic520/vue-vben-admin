@@ -3,7 +3,7 @@
   import { useVModel } from '@vueuse/core';
   import { ref, nextTick } from 'vue';
   import { InputSearch, Button } from 'ant-design-vue';
-  import { useXWebsocketFn } from '@/utils/websocket';
+  import { useXWebsocket } from '@/utils/websocket';
   import { DeviceType } from '../device.data';
   import { useMessage } from '@/hooks/web/useMessage';
   import BasicModal from '@/components/Modal/src/BasicModal.vue';
@@ -18,7 +18,7 @@
     values: propTypes.object.def({}),
   });
 
-  const { asyncSendMessage } = useXWebsocketFn(); // sendMessageWithCallback
+  const { asyncSendMessage } = useXWebsocket(); // sendMessageWithCallback
   const { createMessage } = useMessage();
   const loading = ref(false);
 

@@ -45,5 +45,7 @@ declare module 'vue-router' {
     ignoreRoute?: boolean;
     // Hide path for children
     hidePathForChildren?: boolean;
+    // 额外参数
+    extraParam?: { name?: string };
   }
 }

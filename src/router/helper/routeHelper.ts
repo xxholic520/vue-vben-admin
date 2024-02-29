@@ -191,7 +191,7 @@ function isMultipleRoute(routeModule: AppRouteModule) {
 export function transformRyPlusToRoutes<T = AppRouteModule>(routeList: RouterVO[]): T[] {
   const appRoutesList: AppRouteModule[] = [];
   routeList.forEach((route) => {
-    const { name, path, children } = route;
+    const { name, path, children, query } = route;
     const { title, icon, noCache: ignoreKeepAlive, link, ...otherMeta } = route.meta;
     const appRoute: AppRouteModule = {
       name,
@@ -201,6 +201,7 @@ export function transformRyPlusToRoutes<T = AppRouteModule>(routeList: RouterVO[
         icon,
         ignoreKeepAlive,
         hideMenu: route.hidden,
+        extraParam: { ...(query ? JSON.parse(query) : {}) },
         ...otherMeta,
       },
       component: route.component,

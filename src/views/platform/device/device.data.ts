@@ -189,6 +189,16 @@ export const formSchema: FormSchema[] = [
     }),
   },
   {
+    label: '设备名称',
+    field: 'devName',
+    required: true,
+    component: 'Input',
+    componentProps: {
+      placeholder: '请输入设备名称',
+      autocomplete: 'off',
+    },
+  },
+  {
     label: '设备端口类型',
     field: 'devPortType',
     required: true,
@@ -198,16 +208,6 @@ export const formSchema: FormSchema[] = [
       options: dictState.value.dsp_device_port_type,
       getPopupContainer: (triggerNode) => triggerNode.parentNode,
     }),
-  },
-  {
-    label: '设备名称',
-    field: 'devName',
-    required: true,
-    component: 'Input',
-    componentProps: {
-      placeholder: '请输入设备名称',
-      autocomplete: 'off',
-    },
   },
   {
     label: '设备地址',

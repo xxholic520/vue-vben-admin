@@ -9,11 +9,13 @@
   import { IconEnum } from '@/enums/appEnum';
   import DeviceModal from './DeviceModal.vue';
   import { columns, searchFormSchema, DeviceType } from './device.data';
-  import { WebsocketResponseCode, useXWebsocketFn } from '@/utils/websocket';
+  import { WebsocketResponseCode, useXWebsocket } from '@/utils/websocket';
   import { useMessage } from '@/hooks/web/useMessage';
+  import TestReaderModal from './components/TestReaderModal.vue';
+  import ConfigModal from './components/ConfigModal.vue';
 
   const { createMessage } = useMessage();
-  const { sendMessageWithCallback } = useXWebsocketFn();
+  const { sendMessageWithCallback } = useXWebsocket();
 
   const [registerTable, { reload, getForm, multipleRemove, getSelectRowKeys }] = useTable({
     api: getDeviceList,
@@ -56,12 +58,13 @@
 
   // 打印测试
   function handlePrintTest(record: Recordable) {
-    const { withServer, devPortAddr } = record;
+    const { id: deviceId, devName, devPortAddr } = record;
+    createMessage.loading(`【${devName}】正在打印，请稍候...`, 0);
     sendMessageWithCallback(
-      `${withServer}/printer/print`,
+      `${deviceId}/printer/print`,
       {
         printerName: devPortAddr,
-        epc: '1234',
+        // epc: '1234',
         printData: JSON.stringify({
           command: '_thermal_zpl_print_',
           printdirectly: 'true',
@@ -95,6 +98,7 @@
         }),
       },
       (data) => {
+        createMessage.destroy();
         const res = JSON.parse(data);
         if (res.code === WebsocketResponseCode.Success) {
           createMessage.success('操作成功');
@@ -103,6 +107,18 @@
         }
       },
     );
+  }
+
+  const [registerTestReaderModal, { openModal: openTestReaderModal }] = useModal();
+  // 读写器测试（读）
+  function handleReaderTest(record: Recordable) {
+    openTestReaderModal(true, { record });
+  }
+
+  const [registerConfigModal, { openModal: openConfigModal }] = useModal();
+  // 配置项
+  function handleConfig(record: Recordable) {
+    openConfigModal(true, { record });
   }
 </script>
 
@@ -164,8 +180,9 @@
                 },
               },
             ]"
-            :drop-down-actions="
-              record.devType === DeviceType.Printer
+            :drop-down-actions="[
+              { label: '配置项', onClick: handleConfig.bind(null, record) },
+              ...(record.devType === DeviceType.Printer
                 ? [
                     {
                       label: '打印测试',
@@ -173,8 +190,15 @@
                       onClick: handlePrintTest.bind(null, record),
                     },
                   ]
-                : []
-            "
+                : record.devType === DeviceType.RfidReader
+                  ? [
+                      {
+                        label: '读写器测试',
+                        onClick: handleReaderTest.bind(null, record),
+                      },
+                    ]
+                  : []),
+            ]"
           />
         </template>
       </template>
@@ -182,5 +206,11 @@
 
     <!--  -->
     <DeviceModal @register="registerModal" @success="reload" />
+
+    <!--  -->
+    <TestReaderModal @register="registerTestReaderModal" />
+
+    <!--  -->
+    <ConfigModal @register="registerConfigModal" @success="reload" />
   </div>
 </template>
