@@ -21,13 +21,9 @@ export const useDictStore = defineStore({
         return null;
       }
       try {
-        for (let i = 0; i < this.$state.length; i++) {
-          if (this.$state[i].key === key) {
-            return this.$state[i].value;
-          }
-        }
+        return this.$state.find((item) => item.key === key)?.value;
       } catch (error) {
-        return null;
+        //
       }
       return null;
     },

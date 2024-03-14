@@ -43,6 +43,9 @@ export function refreshConfig() {
   return defHttp.delete({ url: '/system/config/refreshCache' });
 }
 
-export function getConfigKey(configKey: string) {
-  return defHttp.get({ url: `/system/config/configKey/${configKey}` });
+export function getConfigByKey(configKey: string) {
+  return defHttp.get(
+    { url: `/system/config/configKey/${configKey}` },
+    { isTransformResponse: false },
+  );
 }

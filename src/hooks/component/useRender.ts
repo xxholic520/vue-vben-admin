@@ -2,8 +2,11 @@ import { DictTag } from '@/components/Tag';
 import { formatToDate, formatToDateTime } from '@/utils/dateUtil';
 import { DictDataOption } from '@/utils/helper/dictHelper';
 import { VNode, h } from 'vue';
-import { Image as AImage, Switch, Tag } from 'ant-design-vue';
-import { promiseTimeout } from '@vueuse/shared';
+import { Image as AImage, Switch, Tag, Tooltip } from 'ant-design-vue';
+import Icon from '@/components/Icon/Icon.vue';
+import { TooltipPlacement } from 'ant-design-vue/lib/tooltip';
+import { promiseTimeout } from '@vueuse/core';
+
 // import { useMessage } from '../web/useMessage';
 
 // const { createConfirm } = useMessage();
@@ -75,6 +78,28 @@ function renderSwitch(record: Recordable, api: (...data: any) => Promise<any>) {
   });
 }
 
+function renderIcon(icon: string) {
+  return h(Icon, { icon });
+}
+
+function renderIconSpan(icon: string, value: string, marginLeft = '2px') {
+  return h(
+    'span',
+    {
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      },
+    },
+    [renderIcon(icon), ' ', h('span', { style: { marginLeft } }, value)],
+  );
+}
+
+function renderTooltip(value: string, placement: TooltipPlacement = 'top') {
+  return h(Tooltip, { placement, title: value }, () => value);
+}
+
 export function useRender() {
   return {
     renderDictTag,
@@ -84,5 +109,7 @@ export function useRender() {
     renderSwitch,
     renderTag,
     renderTags,
+    renderIconSpan,
+    renderTooltip,
   };
 }

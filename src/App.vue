@@ -39,5 +39,7 @@
   // Listening to page changes and dynamically changing site titles
   useTitle();
 
-  useXWebsocket();
+  const { initWebsocket } = useXWebsocket();
+
+  initWebsocket();
 </script>
