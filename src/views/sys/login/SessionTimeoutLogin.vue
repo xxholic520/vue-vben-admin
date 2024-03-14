@@ -1,9 +1,9 @@
 <template>
-  <!-- <transition> -->
-  <div :class="prefixCls">
-    <Login sessionTimeout />
-  </div>
-  <!-- </transition> -->
+  <transition>
+    <div :class="prefixCls" v-if="true">
+      <Login sessionTimeout />
+    </div>
+  </transition>
 </template>
 <script lang="ts" setup>
   import { onBeforeUnmount, onMounted, ref } from 'vue';
@@ -27,12 +27,12 @@
 
   onMounted(() => {
     // 记录当前的UserId
-    userId.value = userStore.getUserInfo?.user?.userId;
+    userId.value = userStore.getUserInfo?.userId;
     console.log('Mounted', userStore.getUserInfo);
   });
 
   onBeforeUnmount(() => {
-    if (userId.value && userId.value !== userStore.getUserInfo?.user?.userId) {
+    if (userId.value && userId.value !== userStore.getUserInfo?.userId) {
       // 登录的不是同一个用户，刷新整个页面以便丢弃之前用户的页面状态
       document.location.reload();
     } else if (isBackMode() && permissionStore.getLastBuildMenuTime === 0) {

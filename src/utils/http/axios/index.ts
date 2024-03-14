@@ -86,7 +86,8 @@ const transform: AxiosTransform = {
       case ResultEnum.UNAUTHORIZED:
         timeoutMsg = t('sys.api.timeoutMessage');
         const userStore = useUserStoreWithOut();
-        userStore.logout(true);
+        // 被动登出，带redirect地址
+        userStore.logout(false);
         break;
       default:
         if (msg) {

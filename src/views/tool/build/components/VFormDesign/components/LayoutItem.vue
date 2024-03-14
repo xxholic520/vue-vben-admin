@@ -115,7 +115,7 @@
   });
 </script>
 <style lang="less">
-  @import url("../styles/variable.less");
+  @import url('../styles/variable.less');
 
   .layout-width {
     width: 100%;

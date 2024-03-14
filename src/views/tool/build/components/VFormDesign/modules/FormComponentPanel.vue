@@ -94,8 +94,8 @@
 </script>
 
 <style lang="less" scoped>
-  @import url("../styles/variable.less");
-  @import url("../styles/drag.less");
+  @import url('../styles/variable.less');
+  @import url('../styles/drag.less');
 
   .v-form-container {
     // 内联布局样式

@@ -43,6 +43,8 @@ export interface UserInfo {
   nickName: string;
   avatar?: string;
   createTime: string;
+  homePath?: string;
+  remark: string;
 }
 
 /**
